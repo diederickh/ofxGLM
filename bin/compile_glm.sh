@@ -1,7 +1,7 @@
 #!/bin/sh
 base=${PWD}
 builddir=${PWD}/build/
-install_dir="/Users/diederickhuijbers/c++/of/addons_diederick/ofxGLM/"
+install_dir="/Users/diederickhuijbers/c++/of/addons_diederick/ofxGLM/src/"
 if [ "$1" = "download"  ] ; then
 	if [ ! -d ${base}/glm ] ; then 
 		mkdir ${base}/glm
@@ -110,9 +110,11 @@ if [ "$1" = "extract" ] ; then
 	rm -r simage
 
 fi
+
+
 export LDFLAGS="-arch i386 "
 export CFLAGS="-Os -arch i386 "
-export CC="gcc-4.0"
+export CC="gcc-4.0 "
 
 if [ "$1" = "jpg" ] ; then
 	cd ${base}/jpeg
@@ -139,9 +141,9 @@ fi
 if [ "$1" = "tiff" ] ; then
 	cd ${base}/tiff
 	./configure --prefix=${builddir} --enable-static=yes --enable-shared=no --disable-dependency-tracking \
-	 	CFLAGS="-I${builddir}/include/ -L${builddir}/lib/ -arch i386" \
-	        LDFLAGS="-L${builddir}/lib/ -arch i386" \
-		CPPFLAGS="-I${builddir}/include/ -arch i386"
+	 	CFLAGS="-I${builddir}/include/ -L${builddir}/lib/ -arch i386 " \
+	        LDFLAGS="-L${builddir}/lib/ -arch i386 " \
+		CPPFLAGS="-I${builddir}/include/ -arch i386 "
 	make
 	make install
 fi
@@ -153,9 +155,9 @@ if [ "$1" = "mng" ] ; then
 		./autogen.sh	
 	fi	
 	./configure --prefix=${builddir} --enable-static=yes --disable-dependency-tracking \
-		CFLAGS="-I${builddir}/include/ -L${builddir}/lib/ -arch i386" \
-                LDFLAGS="-L${builddir}/lib/ -arch i386" \
-                CPPFLAGS="-I${builddir}/include/ -arch i386"
+		CFLAGS="-I${builddir}/include/ -L${builddir}/lib/ -arch i386 " \
+                LDFLAGS="-L${builddir}/lib/ -arch i386 " \
+                CPPFLAGS="-I${builddir}/include/ -arch i386 "
 	make 
 	make install
 fi
@@ -163,9 +165,9 @@ fi
 if [ "$1" = "lcms" ] ; then
 	cd ${base}/lcms
 	 ./configure --prefix=${builddir} --enable-static=yes --disable-dependency-tracking \
-                CFLAGS="-I${builddir}/include/ -L${builddir}/lib/ -arch i386" \
-                LDFLAGS="-L${builddir}/lib/ -arch i386" \
-                CPPFLAGS="-I${builddir}/include/ -arch i386"
+                CFLAGS="-I${builddir}/include/ -L${builddir}/lib/ -arch i386 " \
+                LDFLAGS="-L${builddir}/lib/ -arch i386 " \
+                CPPFLAGS="-I${builddir}/include/ -arch i386 "
         make
         make install	
 fi
@@ -173,9 +175,9 @@ fi
 if [ "$1" = "jasper" ] ; then
 	cd ${base}/jasper
 	 ./configure --prefix=${builddir} --enable-static=yes --disable-dependency-tracking \
-                CFLAGS="-I${builddir}/include/ -L${builddir}/lib/ -arch i386" \
-                LDFLAGS="-L${builddir}/lib/ -arch i386" \
-                CPPFLAGS="-I${builddir}/include/ -arch i386"
+                CFLAGS="-I${builddir}/include/ -L${builddir}/lib/ -arch i386 " \
+                LDFLAGS="-L${builddir}/lib/ -arch i386 " \
+                CPPFLAGS="-I${builddir}/include/ -arch i386 "
         make
         make install
 fi
@@ -184,9 +186,9 @@ if [ "$1" = "devil" ] ; then
 	cd ${base}/devil
 	 ./configure --prefix=${builddir} --enable-static=yes  --disable-dependency-tracking \
 	 	--enable-png=no \
-		CFLAGS="-I${builddir}include/ -L${builddir}lib/ -arch i386" \
-                LDFLAGS="-L${builddir}lib/ -arch i386" \
-                CPPFLAGS="-I${builddir}include/ -arch i386"
+		CFLAGS="-I${builddir}include/ -L${builddir}lib/ -arch i386 " \
+                LDFLAGS="-L${builddir}lib/ -arch i386 " \
+                CPPFLAGS="-I${builddir}include/ -arch i386 "
         make
         make install
 fi
@@ -194,42 +196,50 @@ fi
 if [ "$1" = "simage" ] ; then
         cd ${base}/simage
          ./configure --prefix=${builddir} --enable-static=yes  --disable-dependency-tracking \
-                CFLAGS="-I${builddir}include/ -L${builddir}lib/ -arch i386" \
-                LDFLAGS="-L${builddir}lib/ -arch i386" \
-                CPPFLAGS="-I${builddir}include/ -arch i386"
+                CFLAGS="-I${builddir}include/ -L${builddir}lib/ -arch i386 " \
+                LDFLAGS="-L${builddir}lib/ -arch i386 " \
+                CPPFLAGS="-I${builddir}include/ -arch i386 " 
         make
         make install
 fi
 
 if [ "$1" = "glm" ] ; then
 	# necessary for libtool bugs
-	cd ${base}/glm/
-	tar -zxvf glm.tgz
-	mv glm-0.3.1/* .
-	rm -r glm-0.3.1
-
+	if [ ! "$2" = "fast" ] ; then
+		cd ${base}/glm/
+		tar -zxvf glm.tgz
+		mv glm-0.3.1/* .
+		rm -r glm-0.3.1
+	fi
 
 	cd ${base}/glm
-	make clean
+	if [ ! "$2" = "fast" ] ; then
+		make clean
+	fi
 	set -x	
+	
 	if [ ! -f ./configure ] ; then
 		./autogen.sh
 	fi
 	
- 	export  CFLAGS="-I${builddir}include/ -L${builddir}lib/ -arch i386" 
-	export  LDFLAGS="-L${builddir}lib/ -arch i386" 
-        export  CPPFLAGS="-L${builddir}lib/ -I${builddir}include/ -arch i386"
+ 	#export  CFLAGS="-I${builddir}include/ -L${builddir}lib/ -arch i386" 
+	#export  LDFLAGS="-L${builddir}lib/ -arch i386" 
+    #export  CPPFLAGS="-L${builddir}lib/ -I${builddir}include/ -arch i386"
 	echo "---------------------------"
 	echo "---------------------------"
 	echo "---------------------------"
-	./configure --enable-static=yes  \
-		--prefix=${builddir} \
-		--disable-dependency-tracking \
-		--with-devil \
-		--with-simage \
-		CFLAGS="-I${builddir}include/ -L${builddir}lib/ -arch i386" \
-		LDFLAGS="-L${builddir}lib/ -arch i386" \
-		CPPFLAGS="-L${builddir}lib/ -I${builddir}include/ -arch i386" 
+
+	if [ ! "$2" = "fast" ]  ; then
+		./configure --enable-static=yes  \
+			--prefix=${builddir} \
+			--disable-dependency-tracking \
+			--with-devil \
+			--with-simage \
+			CFLAGS="-I${builddir}include/ -L${builddir}lib/ -arch i386  -DSINGLE_STRING_GROUP_NAMES" \
+			LDFLAGS="-L${builddir}lib/ -arch i386  -DSINGLE_STRING_GROUP_NAMES" \
+			CPPFLAGS="-L${builddir}lib/ -I${builddir}include/ -arch i386  -DSINGLE_STRING_GROUP_NAMES" 
+	fi
+
 	make
 	make clean
 	make install
@@ -237,8 +247,9 @@ fi
 
 if [ "$1" = "install" ] ; then 
 	if [ -d ${install_dir} ]  ; then 
-		cp -r ${builddir}/lib ${install_dir}
-		cp -r ${builddir}/include ${install_dir}
+		cp ${builddir}/lib/libglm.a ${install_dir}/lib/osx/
+		cp ${builddir}/lib/libsimage.a ${install_dir}/lib/osx/
+		cp ${builddir}/include/glm.h ${install_dir}/include/
 	else
 		echo "install dir not found!"
 	fi
