@@ -7,7 +7,8 @@ ofxGLM::ofxGLM()
 }
 
 bool ofxGLM::load(string sFile, float nScale, bool bNormalize) {
-	model = glmReadOBJ(ofToDataPath(sFile, true).c_str());
+	char* filename = (char*)ofToDataPath(sFile, true).c_str();
+	model = glmReadOBJ(filename);
 	if(!model) {
 		ofLog(OF_LOG_ERROR, "Could not load model: %s", sFile.c_str());
 		return false;
@@ -18,6 +19,8 @@ bool ofxGLM::load(string sFile, float nScale, bool bNormalize) {
 	if(nScale != -1.0) {
 		scale(nScale);
 	}
+	
+	createMaterials();
 	createGroups();
 	return true;
 }
@@ -25,16 +28,46 @@ bool ofxGLM::load(string sFile, float nScale, bool bNormalize) {
 void ofxGLM::createGroups() {
 	GLMgroup* group = model->groups;
 	while(group) {	
-		ofxGLMGroup* vg = new ofxGLMGroup(model, group);
+		ofxGLMMaterial* mat = getMaterial(group->material);
+		ofxGLMGroup* vg = new ofxGLMGroup(model, group, mat);
 		groups.insert(ofxGLMGroupPair(vg->getName(), vg));
 		group = group->next;
-		
-		ofLog(OF_LOG_VERBOSE, "Created ofxGroup with name: '%s'", vg->getName().c_str());
 	}
 }
 
-ofVertexData* ofxGLM::getVertexData(std::string sGroup) {
-	
+void ofxGLM::createMaterials() {
+	for(int i = 0; i < model->nummaterials; ++i) {
+		ofxGLMMaterial* mat = new ofxGLMMaterial();
+		GLMmaterial* glm_mat = &model->materials[i];
+		mat->setGLMMaterial(i, glm_mat, model);
+		materials.insert(ofxGLMMaterialPair(i,mat));
+	}
+}
+
+ofxGLMMaterial* ofxGLM::getMaterial(int nIndex) {
+	ofxGLMMaterials::iterator it = materials.find(nIndex);
+	if(it == materials.end()) {
+		return NULL;
+	}
+	else {	
+		return it->second;
+	}
+}
+
+ofMesh* ofxGLM::getGroupMesh(string sName) {
+	ofxGLMGroup* group = getGroup(sName);
+	if(group != NULL) {
+		return group->getMesh();
+	}
+	return NULL;
+}
+
+ofMeshNode* ofxGLM::getGroupMeshNode(string sName) {
+	ofxGLMGroup* group = getGroup(sName);
+	if(group != NULL) {
+		return group->getMeshNode();
+	}
+	return NULL;
 }
 
 
@@ -83,11 +116,6 @@ ofxGLM& ofxGLM::renderSmooth(bool bDoRender) {
 
 ofxGLM& ofxGLM::renderTexture(bool bDoRender) {
 	render_mode = (bDoRender) ? (render_mode | GLM_TEXTURE) : render_mode & ~GLM_TEXTURE;
-	return *this;
-}
-
-ofxGLM& ofxGLM::renderTwoSided(bool bDoRender) {
-	render_mode = (bDoRender) ? render_mode | GLM_2_SIDED : render_mode & ~GLM_TEXTURE;
 	return *this;
 }
 

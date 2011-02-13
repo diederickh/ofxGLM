@@ -1,13 +1,14 @@
 #pragma once
 #include "ofMain.h"
 #include "ofxGLMConfig.h"
+#include "ofxGLMMaterial.h"
 #include "glm.h"
 
 
 // A ofxGroup is a wrapper around a GLMgroup 
 class ofxGLMGroup {
 public:
-	ofxGLMGroup(GLMmodel* pModel, GLMgroup* pGroup);
+	ofxGLMGroup(GLMmodel* pModel, GLMgroup* pGroup, ofxGLMMaterial* pMaterial);
 	ofVertexData* getVertexData();
 	string getName();
 	

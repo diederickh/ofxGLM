@@ -1,5 +1,3 @@
-#ifndef GLM_H
-#define GLM_H
 /*    
       glm.h
       Nate Robins, 1997, 2000
@@ -14,18 +12,17 @@
  */
 
 
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
+
+#pragma once
+
+// ------------------- ofxGLM --------------------------------------------------
+#ifdef __APPLE__ 
+	#include <OpenGL/OpenGL.h>
+	#include "ofxGLMConfig.h"
 #else
-#include <GL/gl.h>
-#include <GL/glu.h>
+	#error "ofxGLM has been configured for Mac only at the moment!"
 #endif
-
-
-#define GLM_MAX_SHININESS 100.0 /* for Poser */
-#define GLM_MAX_TEXTURE_SIZE 0 /* must be a power of 2 (i.e. 1024).
-				  0 means no limit. */
+// ------------------- ofxGLM --------------------------------------------------
 
 #ifndef M_PI
 #define M_PI 3.14159265f
@@ -37,7 +34,7 @@
 #define GLM_TEXTURE  (1 << 2)       /* render with texture coords */
 #define GLM_COLOR    (1 << 3)       /* render with colors */
 #define GLM_MATERIAL (1 << 4)       /* render with materials */
-#define GLM_2_SIDED  (1 << 5)       /* render two-sided polygons */
+
 
 /* GLMmaterial: Structure that defines a material in a model. 
  */
@@ -47,26 +44,9 @@ typedef struct _GLMmaterial
   GLfloat diffuse[4];           /* diffuse component */
   GLfloat ambient[4];           /* ambient component */
   GLfloat specular[4];          /* specular component */
-#if 0
   GLfloat emmissive[4];         /* emmissive component */
-#endif
   GLfloat shininess;            /* specular exponent */
-  GLuint map_diffuse;     /* diffuse texture ID */
-#if 0
-  GLuint map_ambient;     /* ambient texture ID */
-  GLuint map_specular;     /* specular texture ID */
-  GLuint map_bump;     /* specular texture ID */
-  GLfloat dissolve;             /* transparency */
-  GLuint map_dissolve;     /* alpha texture ID */
-  GLuint lighting;                /* 0=disable, 1=ambient+diffuse, 2=full */
-#endif
-#ifdef AVL
-  int height,
-      width;
-  unsigned char* image;
-  char *t_filename;
-  GLuint t_id[1];	
-#endif
+  char* map_kd;					/* Diederick Huijbers: diffuse map file */
 } GLMmaterial;
 
 /* GLMtriangle: Structure that defines a triangle in a model.
@@ -76,18 +56,7 @@ typedef struct _GLMtriangle {
   GLuint nindices[3];           /* array of triangle normal indices */
   GLuint tindices[3];           /* array of triangle texcoord indices*/
   GLuint findex;                /* index of triangle facet normal */
-#ifdef MATERIAL_BY_FACE
-  GLuint material;
-#endif
 } GLMtriangle;
-
-typedef struct _GLMtexture {
-  char *name;
-  GLuint id;                    /* OpenGL texture ID */
-  GLfloat width;		/* width and height for texture coordinates */
-  GLfloat height;
-} GLMtexture;
-
 
 /* GLMgroup: Structure that defines a group in a model.
  */
@@ -126,20 +95,13 @@ typedef struct _GLMmodel {
   GLuint       numgroups;       /* number of groups in model */
   GLMgroup*    groups;          /* linked list of groups */
 
-#ifndef AVL
-  GLuint       numtextures;
-  GLMtexture*  textures;
-#endif
-
   GLfloat position[3];          /* position of the model */
 
 } GLMmodel;
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 /* glmUnitize: "unitize" a model by translating it to the origin and
  * scaling it to fit in a unit cube around the origin.  Returns the
  * scalefactor used.
@@ -199,10 +161,9 @@ glmFacetNormals(GLMmodel* model);
  *
  * model - initialized GLMmodel structure
  * angle - maximum angle (in degrees) to smooth across
- * keep_existing - if GL_TRUE, do not overwrite existing normals
  */
 GLvoid
-glmVertexNormals(GLMmodel* model, GLfloat angle, GLboolean keep_existing);
+glmVertexNormals(GLMmodel* model, GLfloat angle);
 
 /* glmLinearTexture: Generates texture coordinates according to a
  * linear projection of the texture map.  It generates these by
@@ -241,7 +202,7 @@ glmDelete(GLMmodel* model);
  * filename - name of the file containing the Wavefront .OBJ format data.  
  */
 GLMmodel* 
-glmReadOBJ(const char* filename);
+glmReadOBJ(char* filename);
 
 /* glmWriteOBJ: Writes a model description in Wavefront .OBJ format to
  * a file.
@@ -297,21 +258,37 @@ glmList(GLMmodel* model, GLuint mode);
 GLvoid
 glmWeld(GLMmodel* model, GLfloat epsilon);
 
-GLuint
-glmLoadTexture(const char *filename, GLboolean alpha, GLboolean repeat, GLboolean filtering, GLboolean mipmaps, GLfloat *width, GLfloat *height);
-
-#ifdef AVL
-//AVL Prototypes
-//AVL Flip Texture
-GLvoid glmFlipTexture(unsigned char* texture, int width, int height);
-
-//AVL Flip Model Textures
-GLvoid glmFlipModelTextures(GLMmodel* model);
-
-//AVL END Prototypes
-#endif
+/* glmReadPPM: read a PPM raw (type P6) file.  The PPM file has a header
+ * that should look something like:
+ *
+ *    P6
+ *    # comment
+ *    width height max_value
+ *    rgbrgbrgb...
+ *
+ * where "P6" is the magic cookie which identifies the file type and
+ * should be the only characters on the first line followed by a
+ * carriage return.  Any line starting with a # mark will be treated
+ * as a comment and discarded.   After the magic cookie, three integer
+ * values are expected: width, height of the image and the maximum
+ * value for a pixel (max_value must be < 256 for PPM raw files).  The
+ * data section consists of width*height rgb triplets (one byte each)
+ * in binary format (i.e., such as that written with fwrite() or
+ * equivalent).
+ *
+ * The rgb data is returned as an array of unsigned chars (packed
+ * rgb).  The malloc()'d memory should be free()'d by the caller.  If
+ * an error occurs, an error message is sent to stderr and NULL is
+ * returned.
+ *
+ * filename   - name of the .ppm file.
+ * width      - will contain the width of the image on return.
+ * height     - will contain the height of the image on return.
+ *
+ */
+GLubyte* 
+glmReadPPM(char* filename, int* width, int* height);
 
 #ifdef __cplusplus
 }
-#endif
 #endif

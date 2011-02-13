@@ -1,28 +1,24 @@
 #include "ofxGLMGroup.h"
 #define T(x) (model->triangles[(x)])
 
-ofxGLMGroup::ofxGLMGroup(GLMmodel* pModel, GLMgroup* pGroup)
+ofxGLMGroup::ofxGLMGroup(GLMmodel* pModel, GLMgroup* pGroup, ofxGLMMaterial* pMaterial)
 :model(pModel)
 ,group(pGroup)
 ,name(pGroup->name)
 {
 	int i,j;
 	GLMtriangle* triangle;
-    GLuint material = group->material;
-    GLMmaterial* materialp = &model->materials[material];
-
-
+  
 	// diffuse color
-	ofColor c(
-		 materialp->diffuse[0] 
-		,materialp->diffuse[1] 
-		,materialp->diffuse[2] 
-		,materialp->diffuse[3] 
-	);
+	ofColor c(255,255,255,255);
+	if(pMaterial != NULL) {
+		c = pMaterial->getDiffuseColor();
+		mesh_node.addMaterial(pMaterial);
+	}
 	
 	for(int i = 0; i < group->numtriangles; ++i) {
 		triangle = &T(group->triangles[i]);
-		
+
 		for(int j = 0; j < 3; ++j) {
 			// add a color 
 			vertex_data.addColor(c);
@@ -49,10 +45,32 @@ ofxGLMGroup::ofxGLMGroup(GLMmodel* pModel, GLMgroup* pGroup)
 	
 	// create the mesh.
 	mesh.setVertexData(&vertex_data);
-	mesh.enableColors();
+
+	if(vertex_data.getNumNormals() > 0) {
+		mesh.enableNormals();
+	}
+	
+	if(vertex_data.getNumColors() > 0) {
+		mesh.enableNormals();
+	}
+		
+	if(vertex_data.getNumTexCoords() > 0) {
+		mesh.enableTexCoords();
+		mesh.disableColors();
+	}
+	mesh.setupVbo();
+	//mesh.setRenderMethod(OF_MESH_USING_VBO);
+	/*
+	
+	*/
+	//cout << "mum normals: " << vertex_data.getNumTexCoords();
+	//cout << "------------------\n";
+	//mesh.enableColors();
 	
 	// setup meshnode
 	mesh_node.setMesh(mesh);
+	cout << name << "\n=================\n";
+	cout << vertex_data << std::endl;
 }
 
 ofVertexData* ofxGLMGroup::getVertexData() {
