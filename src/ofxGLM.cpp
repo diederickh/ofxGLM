@@ -53,7 +53,7 @@ ofxGLMMaterial* ofxGLM::getMaterial(int nIndex) {
 		return it->second;
 	}
 }
-
+/*
 ofMesh* ofxGLM::getGroupMesh(string sName) {
 	ofxGLMGroup* group = getGroup(sName);
 	if(group != NULL) {
@@ -69,7 +69,7 @@ ofMeshNode* ofxGLM::getGroupMeshNode(string sName) {
 	}
 	return NULL;
 }
-
+*/
 
 ofxGLM& ofxGLM::listGroups() {
 	ofxGLMGroups::iterator it = groups.begin();
@@ -84,7 +84,7 @@ ofxGLMGroup* ofxGLM::getGroup(string sName) {
 	if(it != groups.end()) {
 		return it->second;
 	}
-	ofLog(OF_LOG_VERBOSE, "ofxGroup NOT found: '%s'", sName);
+	ofLog(OF_LOG_VERBOSE, "ofxGroup NOT found: '%s'", sName.c_str());
 	return NULL;
 }
 

@@ -9,18 +9,26 @@
 class ofxGLMGroup {
 public:
 	ofxGLMGroup(GLMmodel* pModel, GLMgroup* pGroup, ofxGLMMaterial* pMaterial);
-	ofVertexData* getVertexData();
 	string getName();
 	
-	ofMesh* getMesh();
-	ofMeshNode* getMeshNode();
+	bool hasVertices();
+	bool hasNormals();
+	bool hasTexCoords();
+	bool hasColors();
+		
+	vector<ofVec3f>& getVertices();
+	vector<ofVec3f>& getNormals();
+	vector<ofVec2f>& getTexCoords();
+	vector<ofxGLMColor>& getColors();
 	
 	GLMgroup* getGLMGroup();
 	GLMmodel* getGLMModel();
 private:
-	ofMesh mesh;
-	ofMeshNode mesh_node;
-	ofVertexData vertex_data;
+	vector<ofVec3f> vertices;
+	vector<ofVec3f> normals;
+	vector<ofVec2f> texcoords;
+	vector<ofxGLMColor> colors;
+	vector<int> indices;
 	
 	string name;
 	GLMmodel* model;

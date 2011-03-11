@@ -4,7 +4,9 @@
 #include "ofxGLMConfig.h"
 #include "glm.h"
 
-class ofxGLMMaterial : public ofMaterial {
+
+//class ofxGLMMaterial : public ofMaterial {
+class ofxGLMMaterial {
 public:
 	ofxGLMMaterial();
 	void setGLMMaterial(int nIndex, GLMmaterial* pMat, GLMmodel* pModel);
@@ -15,7 +17,7 @@ public:
 	}
 	
 	int material_index;
-	ofTexture texture;
+//	ofTexture texture;
 	
 private:
 	

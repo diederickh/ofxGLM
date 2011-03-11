@@ -1,28 +1,32 @@
 #include "ofxGLMMaterial.h"
 
-ofxGLMMaterial::ofxGLMMaterial():ofMaterial() {
+//ofxGLMMaterial::ofxGLMMaterial():ofMaterial() {
+ofxGLMMaterial::ofxGLMMaterial() {
 }
 
 
 void ofxGLMMaterial::setGLMMaterial(int nIndex, GLMmaterial* pMat, GLMmodel* pModel) {
 	material_index = nIndex;
-	ofColor c= convertFloatsToColor(pMat->diffuse);
+	ofColor c = convertFloatsToColor(pMat->diffuse);
+	/*
 	cout << c << std::endl;
 	setDiffuseColor(convertFloatsToColor(pMat->diffuse));
 	setAmbientColor(convertFloatsToColor(pMat->ambient));
 	setSpecularColor(convertFloatsToColor(pMat->specular));
 	setShininess(pMat->shininess);
-
+*/
 	// do we have a diffuse map?
+	/*
 	if(pMat->map_kd != NULL) {
 		ofImage img;
+		
 		if(img.loadImage(pMat->map_kd)) {
 			texture.allocate(
 				 img.getWidth()
 				,img.getHeight()
-				,img.getOFPixels().getGlDataType()
+				,img.getPixelsRef().getGlDataType()
 			);
-			texture.loadData(img.getOFPixels());
+			texture.loadData(img.getPixelsRef());
 		}
 		else {
 			ofLog(OF_LOG_ERROR, "Cannot load image: '%s'", pMat->map_kd);
@@ -30,5 +34,6 @@ void ofxGLMMaterial::setGLMMaterial(int nIndex, GLMmaterial* pMat, GLMmodel* pMo
 		setDiffuseMap(texture);
 		ofLog(OF_LOG_VERBOSE, "Created material with texture image: '%s'", pMat->map_kd);
 	}
+	*/
 }
 
