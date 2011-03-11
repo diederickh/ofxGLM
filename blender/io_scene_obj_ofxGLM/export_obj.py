@@ -572,7 +572,8 @@ def write_file(filepath, objects, scene,
                         if EXPORT_GROUP_BY_MAT:
                             # can be mat_image or (null)
                             file.write('g %s_%s\n' % (fixName(ob.name), fixName(ob.data.name)) ) # can be mat_image or (null)
-                        file.write('usemtl (null)\n') # mat, image
+                            # !!!: We do not write a "null" material - not standard. (ofxGLM); 	
+						#file.write('usemtl (null)\n') # mat, image
 
                     else:
                         mat_data= mtl_dict.get(key)

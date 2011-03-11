@@ -28,9 +28,14 @@ bool ofxGLM::load(string sFile, float nScale, bool bNormalize) {
 void ofxGLM::createGroups() {
 	GLMgroup* group = model->groups;
 	while(group) {	
-		ofxGLMMaterial* mat = getMaterial(group->material);
-		ofxGLMGroup* vg = new ofxGLMGroup(model, group, mat);
-		groups.insert(ofxGLMGroupPair(vg->getName(), vg));
+		//ofxGLMMaterial* mat = getMaterial(group->material);
+		
+		// store named group.
+		ofxGLMGroup* vg = new ofxGLMGroup(model, group);
+		named_groups.insert(ofxGLMNamedGroupPair(vg->getName(), vg));
+		
+		// and indexed group (not sure if map is necessary.. but if material indices are not incremental it does matter)
+		groups.insert(ofxGLMGroupPair(group->material, vg));
 		group = group->next;
 	}
 }
@@ -41,6 +46,7 @@ void ofxGLM::createMaterials() {
 		GLMmaterial* glm_mat = &model->materials[i];
 		mat->setGLMMaterial(i, glm_mat, model);
 		materials.insert(ofxGLMMaterialPair(i,mat));
+		cout << "Created material i:" << i << endl;
 	}
 }
 
@@ -80,11 +86,19 @@ ofxGLM& ofxGLM::listGroups() {
 }
 
 ofxGLMGroup* ofxGLM::getGroup(string sName) {
-	ofxGLMGroups::iterator it = groups.find(sName);
-	if(it != groups.end()) {
+	ofxGLMNamedGroups::iterator it = named_groups.find(sName);
+	if(it != named_groups.end()) {
 		return it->second;
 	}
 	ofLog(OF_LOG_VERBOSE, "ofxGroup NOT found: '%s'", sName.c_str());
+	return NULL;
+}
+
+ofxGLMGroup* ofxGLM::getGroup(int nIndex) {
+	ofxGLMGroups::iterator it = groups.find(nIndex);
+	if(it != groups.end()) {
+		return it->second;
+	}
 	return NULL;
 }
 
@@ -129,5 +143,62 @@ ofxGLM& ofxGLM::renderColor(bool bDoRender) {
 }
 
 void ofxGLM::draw() {
+	//cout << render_mode << "," << GLM_TEXTURE << endl;
 	glmDraw(model, render_mode);
+}
+
+// model loader helpers
+// ---------------------------------------
+int ofxGLM::getNumMaterials() {
+	return materials.size();
+}
+
+bool ofxGLM::hasDiffuseMaterial(int nMaterialIndex) {
+	return materials[nMaterialIndex]->hasDiffuseMaterial();
+}
+
+bool ofxGLM::getDiffuseMaterialTextureFile(int nMaterialIndex, string& rFileHolder) {
+	return materials[nMaterialIndex]->getDiffuseMaterialTextureFile(rFileHolder);
+}
+
+int ofxGLM::getNumMeshes() {
+	return groups.size();
+}
+
+int ofxGLM::getNumVertices(int nMeshIndex) {
+	return groups[nMeshIndex]->getNumVertices();
+}
+
+ofVec3f ofxGLM::getMeshVertex(int nMeshIndex, int nVertexIndex) {
+	return groups[nMeshIndex]->getVertices()[nVertexIndex];
+}
+
+bool ofxGLM::getMeshName(int nMeshIndex, string& rNameHolder) {
+	if(!groups[nMeshIndex]->hasName()) {
+		return false;
+	}
+	rNameHolder = groups[nMeshIndex]->getName();
+	return true;
+}
+
+int ofxGLM::getNumNormals(int nMeshIndex) {
+	return groups[nMeshIndex]->getNumNormals();
+}
+
+ofVec3f ofxGLM::getMeshNormal(int nMeshIndex, int nNormalIndex) {
+	return groups[nMeshIndex]->getNormals()[nNormalIndex];
+}
+
+int ofxGLM::getNumTexCoords(int nMeshIndex) {
+	return groups[nMeshIndex]->getNumTexCoords();
+}
+
+ofVec2f ofxGLM::getMeshTexCoord(int nMeshIndex, int nTexCoordIndex) {
+	return groups[nMeshIndex]->getTexCoords()[nTexCoordIndex];
+}
+
+// returns -1 when no material was found.
+int ofxGLM::getMeshMaterialIndex(int nMeshIndex) {
+	int mat_index = groups[nMeshIndex]->getMaterialIndex();
+	return mat_index;
 }

@@ -1,36 +1,38 @@
 #include "ofxGLMGroup.h"
 #define T(x) (model->triangles[(x)])
 
-ofxGLMGroup::ofxGLMGroup(GLMmodel* pModel, GLMgroup* pGroup, ofxGLMMaterial* pMaterial)
+ofxGLMGroup::ofxGLMGroup(GLMmodel* pModel, GLMgroup* pGroup)
 :model(pModel)
 ,group(pGroup)
 ,name(pGroup->name)
 {
 	int i,j;
 	GLMtriangle* triangle;
-  
-	// diffuse color
-	ofColor c(255,255,255,255);
 	
-	if(pMaterial != NULL) {
-		//	c = pMaterial->getDiffuseColor();
-		//	mesh_node.addMaterial(pMaterial);
-	}
+  	material_index = pGroup->material;
+		
 	
 	for(int i = 0; i < group->numtriangles; ++i) {
 		triangle = &T(group->triangles[i]);
 
 		for(int j = 0; j < 3; ++j) {
-			if (triangle->nindices[j] != -1) {
-				GLfloat* np = &model->normals[3 * triangle->nindices[j]];
-				ofVec3f n(*np, *(np+1), *(np+2));
-				normals.push_back(n);
+			if(pModel->numnormals > 0) {
+				if (triangle->nindices[j] != -1) {
+					GLfloat* np = &model->normals[3 * triangle->nindices[j]];
+					ofVec3f n(*np, *(np+1), *(np+2));
+					normals.push_back(n);
+				}
 			}
 			
-			if (triangle->tindices[j] != -1) {
-				GLfloat* tp = &model->texcoords[2 * triangle->tindices[j]];
-				ofVec2f tc(*tp, *(tp+1));
-				texcoords.push_back(tc);
+			if(pModel->numtexcoords > 0) {
+
+				if (triangle->tindices[j] != -1) {
+					//cout << " TC " ;
+					//glTexCoord2fv(&model->texcoords[2 * triangle->tindices[2]]);
+					GLfloat* tp = &model->texcoords[2 * triangle->tindices[j]];
+					ofVec2f tc(*tp, 1-(*(tp+1))); // somehow the Y coordinates are flipped (so they start measuring from above)
+					texcoords.push_back(tc);
+				}
 			}
 			
 			// vertex
@@ -38,10 +40,14 @@ ofxGLMGroup::ofxGLMGroup(GLMmodel* pModel, GLMgroup* pGroup, ofxGLMMaterial* pMa
 			ofVec3f v(*vp, *(vp+1), *(vp+2));
 			vertices.push_back(v);
 
-
 			// TODO: implement colors
 		}
+		//cout << "\n----" << endl;
 	}
+}
+
+bool ofxGLMGroup::hasName() {
+	return name != "";
 }
 
 // check if we've got has vertices.
@@ -83,8 +89,22 @@ vector<ofVec2f>& ofxGLMGroup::getTexCoords() {
 vector<ofxGLMColor>& ofxGLMGroup::getColors() {
 	return colors;
 }
-	
 
+int ofxGLMGroup::getNumVertices() {
+	return vertices.size();
+}
+
+int ofxGLMGroup::getNumNormals() {
+	return normals.size();
+}
+	
+int ofxGLMGroup::getNumTexCoords() {
+	return texcoords.size();
+}
+
+int ofxGLMGroup::getNumColors() {
+	return colors.size();
+}
 
 string ofxGLMGroup::getName() {
 	return name;
@@ -107,4 +127,8 @@ GLMgroup* ofxGLMGroup::getGLMGroup() {
 
 GLMmodel* ofxGLMGroup::getGLMModel() {
 	return model;
+}
+
+int ofxGLMGroup::getMaterialIndex() {
+	return material_index;
 }
