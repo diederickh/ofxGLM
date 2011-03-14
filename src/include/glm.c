@@ -820,6 +820,7 @@ glmSecondPass(GLMmodel* model, FILE* file)
                         numtriangles++;
                     }
                 }
+				printf("triangles: %d\n", numtriangles);
                 break;
                 
             default:
@@ -1422,17 +1423,14 @@ glmReadOBJ(char* filename)
     glmFirstPass(model, file);
     
     /* allocate memory */
-    model->vertices = (GLfloat*)malloc(sizeof(GLfloat) *
-        3 * (model->numvertices + 1));
-    model->triangles = (GLMtriangle*)malloc(sizeof(GLMtriangle) *
-        model->numtriangles);
+    model->vertices = (GLfloat*)malloc(sizeof(GLfloat) * 3 * (model->numvertices + 1));
+    model->triangles = (GLMtriangle*)malloc(sizeof(GLMtriangle) *   model->numtriangles);
+	//memset(model->triangles, 0, sizeof(GLMtriangle) * model->numtriangles);
     if (model->numnormals) {
-        model->normals = (GLfloat*)malloc(sizeof(GLfloat) *
-            3 * (model->numnormals + 1));
+        model->normals = (GLfloat*)malloc(sizeof(GLfloat) *  3 * (model->numnormals + 1));
     }
     if (model->numtexcoords) {
-        model->texcoords = (GLfloat*)malloc(sizeof(GLfloat) *
-            2 * (model->numtexcoords + 1));
+        model->texcoords = (GLfloat*)malloc(sizeof(GLfloat) * 2 * (model->numtexcoords + 1));
     }
     
     /* rewind to beginning of file and read in the data this pass */

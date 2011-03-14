@@ -17,22 +17,30 @@ ofxGLMGroup::ofxGLMGroup(GLMmodel* pModel, GLMgroup* pGroup)
 
 		for(int j = 0; j < 3; ++j) {
 			if(pModel->numnormals > 0) {
-				if (triangle->nindices[j] != -1) {
+				
+				//if (triangle->nindices[j] != -1) {
 					GLfloat* np = &model->normals[3 * triangle->nindices[j]];
 					ofVec3f n(*np, *(np+1), *(np+2));
 					normals.push_back(n);
-				}
+				//}
+				
 			}
 			
 			if(pModel->numtexcoords > 0) {
 
-				if (triangle->tindices[j] != -1) {
+				//if (triangle->tindices[j] != -1) {
 					//cout << " TC " ;
 					//glTexCoord2fv(&model->texcoords[2 * triangle->tindices[2]]);
-					GLfloat* tp = &model->texcoords[2 * triangle->tindices[j]];
-					ofVec2f tc(*tp, 1-(*(tp+1))); // somehow the Y coordinates are flipped (so they start measuring from above)
-					texcoords.push_back(tc);
-				}
+					
+					int triangle_index = triangle->tindices[j];
+					if (triangle_index > 0 && triangle_index < pModel->numtriangles) {
+					//	cout << triangle_index << " -- " << pModel->numtriangles << endl;
+						GLfloat* tp = &model->texcoords[2 * triangle->tindices[j]];
+						ofVec2f tc(*tp, 1-(*(tp+1))); // !!!: somehow the Y coordinates are flipped (so they start measuring from above)
+						texcoords.push_back(tc);
+					}
+					
+				//}
 			}
 			
 			// vertex
